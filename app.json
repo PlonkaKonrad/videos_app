@@ -32,9 +32,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "API_KEY": "AIzaSyC6IW_J-h5JCfIT4vF6GjVR7oWH4O3v3pc"
     }
   }
 }
