@@ -1,70 +1,81 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import Loader from '@/components/Loader';
+import SearchBar from '@/components/SearchBar';
+import TopicSection from '@/components/TopicSection';
+import VideoThumbnail from '@/components/VideoThumbnail';
+import useYouTubeVideos from '@/hooks/useYouTubeVideos';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const GEAR = require('@/assets/settings-icon.svg');
+
+interface Topic {
+  title: string;
+  query: string;
+}
 
 export default function HomeScreen() {
+  const router = useRouter();
+  
+  const topics: Topic[] = [
+    { title: 'React Native', query: 'react native' },
+    { title: 'React', query: 'react.js' },
+    { title: 'Typescript', query: 'typescript' },
+  ];
+
+  const renderTopicSection = ({ title, query }: Topic) => {
+    const { videos, isLoading, isError } = useYouTubeVideos(query);
+
+    return (
+      <TopicSection key={title} title={title} linkHref="" linkText="Show more">
+        <Loader isLoading={isLoading} error={isError}>
+          <View style={styles.row}>
+            {videos?.map((item) => (
+              <VideoThumbnail video={item} key={item.id.videoId} />
+            ))}
+          </View>
+        </Loader>
+      </TopicSection>
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <View style={styles.searchBarWrapper}>
+        <SearchBar />
+        <TouchableOpacity style={styles.iconWrapper} onPress={() => router.push('/settings')}>
+          <Image source={GEAR} style={styles.icon} />
+        </TouchableOpacity>
+      </View>
+      <ScrollView>
+        {topics.map((topic) => renderTopicSection(topic))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    paddingTop: 30,
+  },
+  row: {
     flexDirection: 'row',
+    gap: 10
+  },
+  iconWrapper: {
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  icon: {
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  searchBarWrapper: {
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
   },
 });
